@@ -1,0 +1,40 @@
+@using OrdersDashboard.Web.Models
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center metric-card">
+            <div class="card-body">
+                <h3 class="text-primary">@Metrics.PlacedOrdersToday</h3>
+                <p class="card-text">Placed Orders Today</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center metric-card">
+            <div class="card-body">
+                <h3 class="text-info">@Metrics.Average7DayPlacedOrders</h3>
+                <p class="card-text">Average 7-Day Placed Orders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center metric-card">
+            <div class="card-body">
+                <h3 class="text-success">@Metrics.CompletedOrders</h3>
+                <p class="card-text">Completed Orders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center metric-card">
+            <div class="card-body">
+                <h3 class="text-danger">@Metrics.RedLights</h3>
+                <p class="card-text">Red Lights</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DashboardMetrics Metrics { get; set; } = new();
+}

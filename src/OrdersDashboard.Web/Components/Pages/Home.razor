@@ -1,7 +1,42 @@
 ﻿@page "/"
+@using OrdersDashboard.Web.Models
+@using OrdersDashboard.Web.Services
+@inject IOrderService OrderService
 
 <PageTitle>Orders Dashboard</PageTitle>
 
 <h1>Orders Dashboard</h1>
 
-<p>Welcome to Fredrik's Orders Dashboard. Order details will be implemented here.</p>
+@if (isLoading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading dashboard data...</p>
+    </div>
+}
+else
+{
+    <DashboardMetricsComponent Metrics="@dashboardMetrics" />
+    <OrdersGrid Orders="@orders" />
+}
+
+@code {
+    private DashboardMetrics dashboardMetrics = new();
+    private IEnumerable<Order> orders = new List<Order>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            dashboardMetrics = await OrderService.GetDashboardMetricsAsync();
+            orders = await OrderService.GetOrdersAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
