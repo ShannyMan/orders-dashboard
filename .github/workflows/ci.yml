@@ -32,7 +32,7 @@ jobs:
     - name: Test
       id: test
       run: |
-        dotnet test --no-build --configuration Release --verbosity normal --logger trx --results-directory test-results
+        dotnet test --no-build --configuration Release --verbosity normal --logger trx --results-directory test-results --collect:"XPlat Code Coverage"
         echo "test-result=$?" >> $GITHUB_OUTPUT
       continue-on-error: true
       
@@ -51,6 +51,7 @@ jobs:
           // Find TRX files
           const testResultsDir = 'test-results';
           let testSummary = '';
+          let coveragePercentage = '';
           
           if (fs.existsSync(testResultsDir)) {
             const trxFiles = fs.readdirSync(testResultsDir).filter(f => f.endsWith('.trx'));
@@ -70,6 +71,38 @@ jobs:
                 testSummary += `, ${failed} failed`;
               }
             }
+            
+            // Find and parse coverage files
+            const findCoverageFiles = (dir) => {
+              const files = [];
+              const items = fs.readdirSync(dir, { withFileTypes: true });
+              for (const item of items) {
+                const fullPath = path.join(dir, item.name);
+                if (item.isDirectory()) {
+                  files.push(...findCoverageFiles(fullPath));
+                } else if (item.name === 'coverage.cobertura.xml') {
+                  files.push(fullPath);
+                }
+              }
+              return files;
+            };
+            
+            const coverageFiles = findCoverageFiles(testResultsDir);
+            if (coverageFiles.length > 0) {
+              try {
+                const coverageContent = fs.readFileSync(coverageFiles[0], 'utf8');
+                // Parse line-rate attribute from coverage element
+                const lineRateMatch = coverageContent.match(/<coverage[^>]+line-rate="([^"]+)"/);
+                if (lineRateMatch) {
+                  const lineRate = parseFloat(lineRateMatch[1]);
+                  const percentage = Math.round(lineRate * 100);
+                  coveragePercentage = `**Coverage:** ${percentage}%`;
+                }
+              } catch (error) {
+                console.error('Error parsing coverage file:', error);
+                coveragePercentage = '**Coverage:** Unable to parse';
+              }
+            }
           }
           
           const status = testPassed ? '✅ **PASSED**' : '❌ **FAILED**';
@@ -80,6 +113,7 @@ jobs:
           ${status}
           
           ${testSummary || 'Test summary not available'}
+          ${coveragePercentage || '**Coverage:** Not available'}
           
           ${testPassed ? 'All tests are passing! Great work!' : 'Some tests are failing. Please review the test results above.'}`;
           
