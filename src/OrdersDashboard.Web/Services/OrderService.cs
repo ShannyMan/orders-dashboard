@@ -2,21 +2,46 @@ using OrdersDashboard.Web.Models;
 
 namespace OrdersDashboard.Web.Services;
 
+/// <summary>
+/// Defines the contract for order-related operations
+/// </summary>
 public interface IOrderService
 {
+    /// <summary>
+    /// Retrieves dashboard metrics asynchronously
+    /// </summary>
+    /// <returns>A task containing the dashboard metrics</returns>
     Task<DashboardMetrics> GetDashboardMetricsAsync();
+    
+    /// <summary>
+    /// Retrieves all orders asynchronously
+    /// </summary>
+    /// <returns>A task containing an enumerable collection of orders</returns>
     Task<IEnumerable<Order>> GetOrdersAsync();
 }
 
+/// <summary>
+/// Provides order-related operations with mock data for demonstration purposes
+/// </summary>
 public class OrderService : IOrderService
 {
+    /// <summary>
+    /// Collection of sample orders for demonstration
+    /// </summary>
     private readonly List<Order> _orders;
 
+    /// <summary>
+    /// Initializes a new instance of the OrderService class
+    /// </summary>
     public OrderService()
     {
         _orders = GenerateSampleOrders();
     }
 
+    /// <summary>
+    /// Calculates and returns dashboard metrics based on current orders
+    /// </summary>
+    /// <returns>A task containing the calculated dashboard metrics</returns>
     public Task<DashboardMetrics> GetDashboardMetricsAsync()
     {
         var today = DateTime.Today;
@@ -38,11 +63,19 @@ public class OrderService : IOrderService
         return Task.FromResult(metrics);
     }
 
+    /// <summary>
+    /// Retrieves all orders in the system
+    /// </summary>
+    /// <returns>A task containing all orders</returns>
     public Task<IEnumerable<Order>> GetOrdersAsync()
     {
         return Task.FromResult<IEnumerable<Order>>(_orders);
     }
 
+    /// <summary>
+    /// Generates sample order data for demonstration purposes
+    /// </summary>
+    /// <returns>A list of sample orders</returns>
     private List<Order> GenerateSampleOrders()
     {
         var random = new Random(42); // Fixed seed for consistent data

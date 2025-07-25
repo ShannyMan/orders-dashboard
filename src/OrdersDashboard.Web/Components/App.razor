@@ -8,6 +8,19 @@
     <base href="/" />
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="app.css" />
+    <style>
+        .bi::before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+        .bi-bag-plus::before { content: "🛍️"; }
+        .bi-graph-up::before { content: "📈"; }
+        .bi-check-circle::before { content: "✅"; }
+        .bi-exclamation-triangle::before { content: "⚠️"; }
+    </style>
     <link rel="stylesheet" href="OrdersDashboard.Web.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
