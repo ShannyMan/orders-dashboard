@@ -36,7 +36,7 @@ public class OrderService : IOrderService
     /// </summary>
     public OrderService(ILogger<OrderService> logger)
     {
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _orders = GenerateSampleOrders();
         _logger.LogInformation("OrderService initialized with {OrderCount} sample orders", _orders.Count);
     }
