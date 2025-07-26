@@ -1,0 +1,219 @@
+@using OrdersDashboard.Web.Models
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Search orders..." @bind="searchTerm" @oninput="FilterOrders" />
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" @bind="statusFilter" @bind:after="FilterOrders">
+            <option value="">All Statuses</option>
+            <option value="Placed">Placed</option>
+            <option value="Fulfillment">Fulfillment</option>
+            <option value="Completed">Completed</option>
+            <option value="Canceled">Canceled</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" @bind="fulfillmentFilter" @bind:after="FilterOrders">
+            <option value="">All Fulfillment Types</option>
+            <option value="Pickup">Pickup</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Shipping">Shipping</option>
+        </select>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.OrderNumber))">
+                    Order Number @GetSortIcon(nameof(Order.OrderNumber))
+                </th>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.Status))">
+                    Status @GetSortIcon(nameof(Order.Status))
+                </th>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.StoreId))">
+                    Store ID @GetSortIcon(nameof(Order.StoreId))
+                </th>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.StoreName))">
+                    Store Name @GetSortIcon(nameof(Order.StoreName))
+                </th>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.NumberOfItems))">
+                    Items @GetSortIcon(nameof(Order.NumberOfItems))
+                </th>
+                <th style="cursor: pointer;" @onclick="() => SortBy(nameof(Order.FulfillmentType))">
+                    Fulfillment Type @GetSortIcon(nameof(Order.FulfillmentType))
+                </th>
+                <th>Fulfillment Partner</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in filteredOrders)
+            {
+                <tr>
+                    <td><strong>@order.OrderNumber</strong></td>
+                    <td>
+                        <span class="badge @GetStatusBadgeClass(order.Status)">
+                            @order.Status
+                        </span>
+                    </td>
+                    <td>@order.StoreId</td>
+                    <td>@order.StoreName</td>
+                    <td>@order.NumberOfItems</td>
+                    <td>@order.FulfillmentType</td>
+                    <td>@order.FulfillmentPartner</td>
+                    <td>
+                        @if (order.Status == OrderStatus.Completed)
+                        {
+                            <!-- No actions for completed orders -->
+                        }
+                        else if (order.Status == OrderStatus.Canceled)
+                        {
+                            <button class="btn btn-sm btn-outline-success" @onclick="() => ReopenOrder(order.OrderNumber)">
+                                Reopen
+                            </button>
+                        }
+                        else
+                        {
+                            <!-- Dropdown for active orders (Placed, Fulfillment) -->
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                        id="dropdownMenuButton@(order.OrderNumber)" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton@(order.OrderNumber)">
+                                    <li><a class="dropdown-item" href="#" @onclick="() => EditOrder(order.OrderNumber)" @onclick:preventDefault="true">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="() => ViewOrder(order.OrderNumber)" @onclick:preventDefault="true">View</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" @onclick="() => CancelOrder(order.OrderNumber)" @onclick:preventDefault="true">Cancel</a></li>
+                                </ul>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!filteredOrders.Any())
+{
+    <div class="text-center py-4">
+        <p class="text-muted">No orders found matching your criteria.</p>
+    </div>
+}
+
+@code {
+    [Parameter] public IEnumerable<Order> Orders { get; set; } = new List<Order>();
+
+    private List<Order> filteredOrders = new();
+    private string searchTerm = string.Empty;
+    private string statusFilter = string.Empty;
+    private string fulfillmentFilter = string.Empty;
+    private string sortColumn = nameof(Order.OrderNumber);
+    private bool sortAscending = true;
+
+    protected override void OnParametersSet()
+    {
+        FilterOrders();
+    }
+
+    private void FilterOrders()
+    {
+        filteredOrders = Orders.Where(order =>
+            (string.IsNullOrEmpty(searchTerm) || 
+             order.OrderNumber.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             order.StoreName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             order.StoreId.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(statusFilter) || order.Status.ToString() == statusFilter) &&
+            (string.IsNullOrEmpty(fulfillmentFilter) || order.FulfillmentType.ToString() == fulfillmentFilter)
+        ).ToList();
+
+        SortOrders();
+        StateHasChanged();
+    }
+
+    private void SortBy(string columnName)
+    {
+        if (sortColumn == columnName)
+        {
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortColumn = columnName;
+            sortAscending = true;
+        }
+        SortOrders();
+    }
+
+    private void SortOrders()
+    {
+        filteredOrders = sortColumn switch
+        {
+            nameof(Order.OrderNumber) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.OrderNumber).ToList()
+                : filteredOrders.OrderByDescending(o => o.OrderNumber).ToList(),
+            nameof(Order.Status) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.Status).ToList()
+                : filteredOrders.OrderByDescending(o => o.Status).ToList(),
+            nameof(Order.StoreId) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.StoreId).ToList()
+                : filteredOrders.OrderByDescending(o => o.StoreId).ToList(),
+            nameof(Order.StoreName) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.StoreName).ToList()
+                : filteredOrders.OrderByDescending(o => o.StoreName).ToList(),
+            nameof(Order.NumberOfItems) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.NumberOfItems).ToList()
+                : filteredOrders.OrderByDescending(o => o.NumberOfItems).ToList(),
+            nameof(Order.FulfillmentType) => sortAscending 
+                ? filteredOrders.OrderBy(o => o.FulfillmentType).ToList()
+                : filteredOrders.OrderByDescending(o => o.FulfillmentType).ToList(),
+            _ => filteredOrders
+        };
+    }
+
+    private string GetSortIcon(string columnName)
+    {
+        if (sortColumn != columnName) return "";
+        return sortAscending ? " ▲" : " ▼";
+    }
+
+    private string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Placed => "bg-primary",
+            OrderStatus.Fulfillment => "bg-warning text-dark",
+            OrderStatus.Completed => "bg-success",
+            OrderStatus.Canceled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private void EditOrder(int orderNumber)
+    {
+        // TODO: Implement edit functionality
+        Console.WriteLine($"Editing order {orderNumber}");
+    }
+
+    private void ViewOrder(int orderNumber)
+    {
+        // TODO: Implement view functionality
+        Console.WriteLine($"Viewing order {orderNumber}");
+    }
+
+    private void CancelOrder(int orderNumber)
+    {
+        // TODO: Implement cancel functionality
+        Console.WriteLine($"Canceling order {orderNumber}");
+    }
+
+    private void ReopenOrder(int orderNumber)
+    {
+        // TODO: Implement reopen functionality
+        Console.WriteLine($"Reopening order {orderNumber}");
+    }
+}
