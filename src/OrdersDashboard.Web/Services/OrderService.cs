@@ -29,13 +29,16 @@ public class OrderService : IOrderService
     /// Collection of sample orders for demonstration
     /// </summary>
     private readonly List<Order> _orders;
+    private readonly ILogger<OrderService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the OrderService class
     /// </summary>
-    public OrderService()
+    public OrderService(ILogger<OrderService> logger)
     {
+        _logger = logger;
         _orders = GenerateSampleOrders();
+        _logger.LogInformation("OrderService initialized with {OrderCount} sample orders", _orders.Count);
     }
 
     /// <summary>
@@ -44,6 +47,8 @@ public class OrderService : IOrderService
     /// <returns>A task containing the calculated dashboard metrics</returns>
     public Task<DashboardMetrics> GetDashboardMetricsAsync()
     {
+        _logger.LogInformation("Calculating dashboard metrics");
+        
         var today = DateTime.Today;
         var placedToday = _orders.Count(o => o.OrderDate.Date == today && o.Status == OrderStatus.Placed);
         var sevenDaysAgo = today.AddDays(-7);
@@ -60,6 +65,9 @@ public class OrderService : IOrderService
             RedLights = redLights
         };
 
+        _logger.LogInformation("Dashboard metrics calculated: PlacedToday={PlacedToday}, Avg7Day={Average7Day}, Completed={Completed}, RedLights={RedLights}",
+            placedToday, average7Day, completed, redLights);
+
         return Task.FromResult(metrics);
     }
 
@@ -69,6 +77,7 @@ public class OrderService : IOrderService
     /// <returns>A task containing all orders</returns>
     public Task<IEnumerable<Order>> GetOrdersAsync()
     {
+        _logger.LogInformation("Retrieving all orders");
         return Task.FromResult<IEnumerable<Order>>(_orders);
     }
 
@@ -78,6 +87,8 @@ public class OrderService : IOrderService
     /// <returns>A list of sample orders</returns>
     private List<Order> GenerateSampleOrders()
     {
+        _logger.LogDebug("Generating sample order data");
+        
         var random = new Random(42); // Fixed seed for consistent data
         var stores = new[]
         {
@@ -116,6 +127,7 @@ public class OrderService : IOrderService
             });
         }
 
+        _logger.LogDebug("Generated {OrderCount} sample orders", orders.Count);
         return orders;
     }
 }

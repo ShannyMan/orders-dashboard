@@ -1,5 +1,9 @@
 using OrdersDashboard.Web.Components;
 using OrdersDashboard.Web.Services;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +12,33 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<IOrderService, OrderService>();
+
+// Configure OpenTelemetry resource
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(
+        serviceName: builder.Configuration["OpenTelemetry:ServiceName"] ?? "OrdersDashboard",
+        serviceVersion: builder.Configuration["OpenTelemetry:ServiceVersion"] ?? "1.0.0",
+        serviceInstanceId: Environment.MachineName);
+
+// Configure OpenTelemetry Logging
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.SetResourceBuilder(resourceBuilder);
+    options.AddConsoleExporter();
+});
+
+// Configure OpenTelemetry Tracing and Metrics
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .SetResourceBuilder(resourceBuilder)
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .SetResourceBuilder(resourceBuilder)
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter());
 
 var app = builder.Build();
 
