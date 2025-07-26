@@ -65,14 +65,31 @@
                     <td>@order.FulfillmentType</td>
                     <td>@order.FulfillmentPartner</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditOrder(order.OrderNumber)">
-                            Edit
-                        </button>
-                        @if (order.Status != OrderStatus.Canceled && order.Status != OrderStatus.Completed)
+                        @if (order.Status == OrderStatus.Completed)
                         {
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelOrder(order.OrderNumber)">
-                                Cancel
+                            <!-- No actions for completed orders -->
+                        }
+                        else if (order.Status == OrderStatus.Canceled)
+                        {
+                            <button class="btn btn-sm btn-outline-success" @onclick="() => ReopenOrder(order.OrderNumber)">
+                                Reopen
                             </button>
+                        }
+                        else
+                        {
+                            <!-- Dropdown for active orders (Placed, Fulfillment) -->
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                        id="dropdownMenuButton@(order.OrderNumber)" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton@(order.OrderNumber)">
+                                    <li><a class="dropdown-item" href="#" @onclick="() => EditOrder(order.OrderNumber)" @onclick:preventDefault="true">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="() => ViewOrder(order.OrderNumber)" @onclick:preventDefault="true">View</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" @onclick="() => CancelOrder(order.OrderNumber)" @onclick:preventDefault="true">Cancel</a></li>
+                                </ul>
+                            </div>
                         }
                     </td>
                 </tr>
@@ -182,9 +199,21 @@
         Console.WriteLine($"Editing order {orderNumber}");
     }
 
+    private void ViewOrder(int orderNumber)
+    {
+        // TODO: Implement view functionality
+        Console.WriteLine($"Viewing order {orderNumber}");
+    }
+
     private void CancelOrder(int orderNumber)
     {
         // TODO: Implement cancel functionality
         Console.WriteLine($"Canceling order {orderNumber}");
+    }
+
+    private void ReopenOrder(int orderNumber)
+    {
+        // TODO: Implement reopen functionality
+        Console.WriteLine($"Reopening order {orderNumber}");
     }
 }
