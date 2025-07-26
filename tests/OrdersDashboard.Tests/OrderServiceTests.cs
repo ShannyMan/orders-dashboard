@@ -1,15 +1,23 @@
 using OrdersDashboard.Web.Models;
 using OrdersDashboard.Web.Services;
+using Microsoft.Extensions.Logging;
 
 namespace OrdersDashboard.Tests;
 
 public class OrderServiceTests
 {
+    private readonly ILogger<OrderService> _mockLogger;
+
+    public OrderServiceTests()
+    {
+        _mockLogger = new LoggerFactory().CreateLogger<OrderService>();
+    }
+
     [Fact]
     public async Task GetOrdersAsync_ReturnsCorrectNumberOfOrders()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var orders = await orderService.GetOrdersAsync();
@@ -22,7 +30,7 @@ public class OrderServiceTests
     public async Task GetOrdersAsync_ReturnsOrdersWithExpectedProperties()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var orders = await orderService.GetOrdersAsync();
@@ -41,7 +49,7 @@ public class OrderServiceTests
     public async Task GetDashboardMetricsAsync_ReturnsValidMetrics()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var metrics = await orderService.GetDashboardMetricsAsync();
@@ -58,7 +66,7 @@ public class OrderServiceTests
     public async Task GetDashboardMetricsAsync_MetricsAddUpToTotalOrders()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var orders = await orderService.GetOrdersAsync();
@@ -76,7 +84,7 @@ public class OrderServiceTests
     public async Task GetOrdersAsync_ContainsVariousOrderStatuses()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var orders = await orderService.GetOrdersAsync();
@@ -90,7 +98,7 @@ public class OrderServiceTests
     public async Task GetOrdersAsync_ContainsVariousFulfillmentTypes()
     {
         // Arrange
-        var orderService = new OrderService();
+        var orderService = new OrderService(_mockLogger);
 
         // Act
         var orders = await orderService.GetOrdersAsync();
