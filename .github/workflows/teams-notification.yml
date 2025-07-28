@@ -69,7 +69,7 @@ jobs:
                     },
                     {
                       "type": "TextBlock",
-                      "text": ("**Title:** " + $title),
+                      "text": $title,
                       "wrap": true
                     },
                     {
