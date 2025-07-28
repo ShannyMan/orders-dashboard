@@ -76,11 +76,9 @@ dotnet test --verbosity normal
 
 ## CI/CD Pipeline
 
-The project includes a GitHub Actions workflow that:
-- Builds the application on every push and pull request
-- Runs all unit tests
-- Reports test results as PR comments
-- Ensures code quality and reliability
+The project includes GitHub Actions workflows that:
+- **CI Workflow**: Builds the application on every push and pull request, runs all unit tests, reports test results as PR comments, and ensures code quality and reliability
+- **Teams Notification**: Automatically posts pull request information to Microsoft Teams channel including author, description, files changed, and direct link to the PR
 
 ## Contributing
 
