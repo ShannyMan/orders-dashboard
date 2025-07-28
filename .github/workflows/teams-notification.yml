@@ -65,15 +65,16 @@ jobs:
                       "type": "TextBlock",
                       "size": "Medium",
                       "weight": "Bolder",
-                      "text": "🔄 Pull Request Update"
+                      "text": "🔄 Pull Request"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": ("**Title:** " + $title),
+                      "wrap": true
                     },
                     {
                       "type": "FactSet",
                       "facts": [
-                        {
-                          "title": "Author:",
-                          "value": $author
-                        },
                         {
                           "title": "Repository:",
                           "value": $repo
@@ -83,15 +84,14 @@ jobs:
                           "value": ("#" + $pr_number)
                         },
                         {
+                          "title": "Author:",
+                          "value": $author
+                        },
+                        {
                           "title": "Files Changed:",
                           "value": $files_changed
                         }
                       ]
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": ("**Title:** " + $title),
-                      "wrap": true
                     }
                   ],
                   "actions": [
