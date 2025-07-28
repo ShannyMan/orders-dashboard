@@ -32,21 +32,14 @@ jobs:
         AUTHOR="${{ github.event.pull_request.user.login }}"
         REPO_NAME="${{ github.repository }}"
         PR_TITLE="${{ github.event.pull_request.title }}"
-        PR_DESCRIPTION="${{ github.event.pull_request.body }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
         PR_NUMBER="${{ github.event.pull_request.number }}"
-        
-        # Handle null/empty description
-        if [ -z "$PR_DESCRIPTION" ] || [ "$PR_DESCRIPTION" = "null" ]; then
-          PR_DESCRIPTION="No description provided"
-        fi
         
         # Set outputs (jq will handle all escaping)
         echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
         echo "author=$AUTHOR" >> $GITHUB_OUTPUT
         echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
         echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
-        echo "pr_description=$PR_DESCRIPTION" >> $GITHUB_OUTPUT
         echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
     
@@ -59,7 +52,6 @@ jobs:
           --arg pr_number "${{ steps.pr-info.outputs.pr_number }}" \
           --arg files_changed "${{ steps.pr-info.outputs.files_changed }}" \
           --arg title "${{ steps.pr-info.outputs.pr_title }}" \
-          --arg description "${{ steps.pr-info.outputs.pr_description }}" \
           --arg url "${{ steps.pr-info.outputs.pr_url }}" \
           '{
             "type": "message",
@@ -100,12 +92,6 @@ jobs:
                       "type": "TextBlock",
                       "text": ("**Title:** " + $title),
                       "wrap": true
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": ("**Description:** " + $description),
-                      "wrap": true,
-                      "spacing": "Medium"
                     }
                   ],
                   "actions": [
