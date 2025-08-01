@@ -1,4 +1,5 @@
 using OrdersDashboard.Web.Components;
+using OrdersDashboard.Web.Models;
 using OrdersDashboard.Web.Services;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -11,7 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Configure Azure Search options
+builder.Services.Configure<AzureSearchOptions>(
+    builder.Configuration.GetSection(AzureSearchOptions.SectionName));
+
+// Register services
 builder.Services.AddSingleton<IOrderService, OrderService>();
+builder.Services.AddSingleton<IAzureSearchService, AzureSearchService>();
 
 // Configure OpenTelemetry resource
 var resourceBuilder = ResourceBuilder.CreateDefault()
