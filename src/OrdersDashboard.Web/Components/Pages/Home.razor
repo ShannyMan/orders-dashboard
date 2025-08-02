@@ -2,6 +2,7 @@
 @using OrdersDashboard.Web.Models
 @using OrdersDashboard.Web.Services
 @inject IOrderService OrderService
+@inject IAzureSearchService AzureSearchService
 
 <PageTitle>Orders Dashboard</PageTitle>
 
@@ -31,8 +32,11 @@ else
     {
         try
         {
+            // Get dashboard metrics from the existing OrderService
             dashboardMetrics = await OrderService.GetDashboardMetricsAsync();
-            orders = await OrderService.GetOrdersAsync();
+            
+            // Get orders from the new Azure Search service
+            orders = await AzureSearchService.GetOrdersAsync();
         }
         finally
         {
